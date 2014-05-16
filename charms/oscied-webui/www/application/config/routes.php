@@ -44,6 +44,8 @@ $route['404_override'] = '';
 $route['contact'] = "misc/contact";
 
 $route['json'] = "misc/json";
+$route['json_encoders'] = "misc/json_encoders";
+$route['json_samplers'] = "misc/json_samplers";
 
 /* End of file routes.php */
 /* Location: ./application/config/routes.php */

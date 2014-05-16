@@ -36,6 +36,38 @@ class Misc extends MY_Controller
        return $response->value;
    }
 
+   public function json_encoders() {
+       $medias = $this->json_fetch();
+
+       $encoders = array();
+       foreach ($medias as $media) {
+           if (!isset($media->metadata->measures)) continue;
+           $enco = $media->metadata->measures->git_url;
+           $encoders[$enco] = 1;
+       }
+
+       $out_array = array_keys($encoders);
+       $this->output
+           ->set_content_type('application/json')
+           ->set_output(json_encode($out_array));
+   }
+
+   public function json_samplers() {
+       $medias = $this->json_fetch();
+
+       $samplers = array();
+       foreach ($medias as $media) {
+           if ($media->parent != NULL) continue; // only root medias
+           $fname = $media->filename;
+           $samplers[$fname] = 1;
+       }
+
+       $out_array = array_keys($samplers);
+       $this->output
+           ->set_content_type('application/json')
+           ->set_output(json_encode($out_array));
+   }
+
    public function json() {
        $medias = $this->json_fetch();
 
@@ -48,6 +80,8 @@ class Misc extends MY_Controller
 
        $out_array = array();
        foreach ($medias as $media) {
+           // if the media is a root ignore
+           if ($media->parent == NULL) continue;
            // if the media has no measures, skip it
            if (!isset($media->metadata->measures)) continue;
 
@@ -57,7 +91,7 @@ class Misc extends MY_Controller
            if (isset($_GET['date_to'])
                && $media->metadata->add_date > $_GET['date_to']) continue;
            if (isset($_GET['file'])
-               && $media->filename !== $_GET['file']) continue;
+               && $media->parent->filename !== $_GET['file']) continue;
            if (isset($_GET['git_url'])
                && $media->measures->git_url !== $_GET['git_url']) continue;
 
@@ -69,7 +103,8 @@ class Misc extends MY_Controller
            // output filtered medias list
            $out_array[] = array(
                 "git_url" => @$media->metadata->measures->git_url,
-                "file" => @$media->filename,
+                "file" => @$media->parent->filename,
+                "realfile" => @$media->filename,
                 "date" => @$media->metadata->add_date,
                 "metric" => $fmetric,
                 "value" => $fmetric_value,
