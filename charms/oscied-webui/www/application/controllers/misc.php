@@ -35,9 +35,29 @@ class Misc extends MY_Controller
        }
        $medias = $response->value;
 
+       // conditions (supported metrics)
+       $fmetric = strtolower(@$_GET['metric']);
+       if (!in_array($fmetric, array('psnr', 'ssim'))) {
+           http_response_code(400);
+           die('ERROR: missing/invalid metric!');
+       }
+
        $out_array = array();
        foreach ($medias as $media) {
+           // if the media has no measures, skip it
            if (!isset($media->metadata->measures)) continue;
+
+           // filters (all optional)
+           if (isset($_GET['date_from'])
+               && $media->metadata->add_date < $_GET['date_from']) continue;
+           if (isset($_GET['date_to'])
+               && $media->metadata->add_date > $_GET['date_to']) continue;
+           if (isset($_GET['file'])
+               && $media->filename !== $_GET['file']) continue;
+           if (isset($_GET['git_url'])
+               && $media->measures->git_url !== $_GET['git_url']) continue;
+
+           // output filtered medias list
            $out_array[] = array(
                 "git_url" => @$media->metadata->measures->git_url,
                 "file" => @$media->filename,
