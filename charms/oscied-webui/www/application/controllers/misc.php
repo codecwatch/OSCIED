@@ -39,13 +39,13 @@ class Misc extends MY_Controller
        foreach ($medias as $media) {
            if (!isset($media->metadata->measures)) continue;
            $out_array[] = array(
-                "git_url" => $media->metadata->measures->git_url,
-                "file" => $media->filename,
-                "date" => $media->metadata->add_date,
+                "git_url" => @$media->metadata->measures->git_url,
+                "file" => @$media->filename,
+                "date" => @$media->metadata->add_date,
                 "metric" => "PSNR",
-                "bitrate" => $media->metadata->measures->bitrate,
-                "value" => $media->metadata->measures->psnr,
-                "git_commit" => $media->metadata->measures->git_commit,
+                "bitrate" => @$media->metadata->measures->bitrate,
+                "value" => @$media->metadata->measures->psnr,
+                "git_commit" => @$media->metadata->measures->git_commit,
            );
        }
        $this->output
