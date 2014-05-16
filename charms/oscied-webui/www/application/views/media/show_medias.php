@@ -37,7 +37,7 @@
          </td>
          <td><?= (isset($media->metadata->size)?byte_format($media->metadata->size):'') ?></td>
          <td><?= (isset($media->metadata->duration)?$media->metadata->duration:'') ?></td>
-         <td><?= (isset($media->metadata->add_date)?$media->metadata->add_date:'') ?></td>
+         <td><?= (isset($media->metadata->add_date)?date("d/m/o h:i:s", $media->metadata->add_date):'') ?></td>
          <td><?= (isset($media->user->name)?$media->user->name:'') ?></td>
          <td>
             <?php
