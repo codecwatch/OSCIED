@@ -18,6 +18,40 @@ class Misc extends MY_Controller
       $this->render($header_data);
    }
 
+   public function json() {
+       $this->load->helper('number');
+       $this->load->spark('restclient/2.1.0');
+       $this->load->library('rest');
+       $this->rest->initialize(
+               array(
+                   'server' => $this->config->item('orchestra_api_url'), 'http_auth' => 'basic',
+                   'http_user' => $this->user->mail(), 'http_pass' => $this->user->secret()
+                   )
+               );
+       $response = $this->rest->get('media');
+       if ($response->status != 200) {
+           print_r($response->value);
+           exit;
+       }
+       $medias = $response->value;
+
+       $out_array = array();
+       foreach ($medias as $media) {
+           if (!isset($media->metadata->measures)) continue;
+           $out_array[] = array(
+                "encoder" => $media->metadata->measures->git_url,
+                "sample" => $media->filename,
+                "datetime" => $media->metadata->add_date,
+                "type" => "PSNR",
+                "rate" => $media->metadata->measures->bitrate,
+                "value" => $media->metadata->measures->psnr,
+                "gitrev" => $media->metadata->measures->git_commit,
+           );
+       }
+       $this->output
+           ->set_content_type('application/json')
+           ->set_output(json_encode($out_array));
+   }
 }
 
 /* End of file misc.php */
