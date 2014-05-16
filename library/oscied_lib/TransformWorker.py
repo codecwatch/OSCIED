@@ -53,6 +53,7 @@ DASHCAST_SUCCESS_REGEX = re.compile(r'MPD file generated')
 FFMPEG_REGEX = re.compile(
     r'frame=\s*(?P<frame>\d+)\s+fps=\s*(?P<fps>\d+)\s+q=\s*(?P<q>\S+)\s+\S*size=\s*(?P<size>\S+)\s+'
     r'time=\s*(?P<time>\S+)\s+bitrate=\s*(?P<bitrate>\S+)')
+PSNR_REGEX = re.compile(r'Total:\s*(?P<total>\d+\.\d+)\s*\(\s*Y.: (?P<Y>\d+\.\d+)\s*Cb: (?P<Cb>\d+\.\d+)\s*Cr: (?P<Cr>\d+\.\d+)\s*\)')
 
 
 #@celeryd_after_setup.connect
@@ -130,6 +131,9 @@ def transform_task(media_in_json, media_out_json, profile_json, callback_json):
         # Get input media duration and frames to be able to estimate ETA
         media_in_duration = get_media_duration(media_in_path)
 
+        # Keep potential PSNR status
+        psnr_stats = {}
+
         # NOT A REAL TRANSFORM : FILE COPY -----------------------------------------------------------------------------
         if profile.encoder_name == u'copy':
             infos = recursive_copy(media_in_root, media_out_root, copy_callback, RATIO_DELTA, TIME_DELTA)
@@ -195,6 +199,19 @@ def transform_task(media_in_json, media_out_json, profile_json, callback_json):
             # FFmpeg output sanity check
             if returncode != 0:
                 raise OSError(to_bytes(u'FFmpeg return code is {0}, encoding probably failed.'.format(returncode)))
+
+            # compute stats about the video
+            cmd2 = "/usr/bin/dump_psnr" # FIXME: pass argument uncompressed
+            print(cmd2)
+            p_psnr = Popen(shlex.split(cmd2), stdout=PIPE, close_fds=True)
+            make_async(p_psnr.stdout)
+            returncode = p_psnr.wait()
+            select.select([p_psnr.stdout], [], [])
+            p_out = p_psnr.stdout.read()
+            match = PSNR_REGEX.match(p_out)
+            psnr_stats['retcode'] = returncode
+            if match:
+                psnr_stats = match.groupdict()
 
             # Output media file sanity check
 #            media_out_duration = get_media_duration(media_out_path)
@@ -278,7 +295,8 @@ def transform_task(media_in_json, media_out_json, profile_json, callback_json):
         transform_callback(TransformTask.SUCCESS)
         return {u'hostname': request.hostname, u'start_date': start_date, u'elapsed_time': elapsed_time,
                 u'eta_time': 0, u'media_in_size': media_in_size, u'media_in_duration': media_in_duration,
-                u'media_out_size': media_out_size, u'media_out_duration': media_out_duration, u'percent': 100}
+                u'media_out_size': media_out_size, u'media_out_duration': media_out_duration, u'percent': 100,
+                u'psnr': psnr_stats.get('total', -1)}
 
     except Exception as error:
 
