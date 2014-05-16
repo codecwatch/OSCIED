@@ -84,14 +84,16 @@ class Misc extends MY_Controller
            if ($media->parent == NULL) continue;
            // if the media has no measures, skip it
            if (!isset($media->metadata->measures)) continue;
+           // filter not ready
+           if (@$media->status != "READY") continue;
 
            // filters (all optional)
            if (isset($_GET['date_from'])
                && $media->metadata->add_date < $_GET['date_from']) continue;
            if (isset($_GET['date_to'])
                && $media->metadata->add_date > $_GET['date_to']) continue;
-           if (isset($_GET['file'])
-               && $media->parent->filename !== $_GET['file']) continue;
+           if (isset($_GET['source'])
+               && $media->parent->filename !== $_GET['source']) continue;
            if (isset($_GET['git_url'])
                && $media->measures->git_url !== $_GET['git_url']) continue;
 
@@ -103,8 +105,9 @@ class Misc extends MY_Controller
            // output filtered medias list
            $out_array[] = array(
                 "git_url" => @$media->metadata->measures->git_url,
-                "file" => @$media->parent->filename,
-                "realfile" => @$media->filename,
+                "source" => @$media->parent->filename,
+                "filename" => @$media->filename,
+                "url" => site_url("media/force_download/". @$media->_id),
                 "date" => @$media->metadata->add_date,
                 "metric" => $fmetric,
                 "value" => $fmetric_value,
