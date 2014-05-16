@@ -38,6 +38,7 @@ from pytoolbox.encoding import to_bytes
 from pytoolbox.serialization import dict2object, object2dict, object2json
 from pytoolbox.validation import valid_uuid
 from random import randint
+from time import time
 
 from .. import PublisherWorker, TransformWorker
 from ..constants import UUID_ZERO
@@ -216,7 +217,7 @@ class OrchestraAPICore(object):
         media.add_metadata(u'size', size, True)
         if duration:
             media.add_metadata(u'duration', duration, True)
-        media.add_metadata(u'add_date', datetime_now(), True)
+        media.add_metadata(u'add_date', int(time()), True)
         try:
             self._db.medias.save(media.__dict__, safe=True)
         except DuplicateKeyError:
@@ -433,7 +434,7 @@ class OrchestraAPICore(object):
         logging.info(u'New transformation task {0} -> queue {1}.'.format(result_id, queue))
         task = TransformTask(user_id=user_id, media_in_id=media_in._id, media_out_id=media_out._id,
                              profile_id=profile._id, send_email=send_email, _id=result_id)
-        task.statistic[u'add_date'] = datetime_now()
+        task.statistic[u'add_date'] = int(time())
         self._db.transform_tasks.save(task.__dict__, safe=True)
         return task
 
@@ -602,7 +603,7 @@ class OrchestraAPICore(object):
             raise ValueError(to_bytes(u'Unable to transmit task to workers of queue {0}.'.format(queue)))
         logging.info(u'New publication task {0} -> queue {1}.'.format(result_id, queue))
         task = PublisherTask(user_id=user_id, media_id=media._id, send_email=send_email, _id=result_id)
-        task.statistic[u'add_date'] = datetime_now()
+        task.statistic[u'add_date'] = int(time())
         self._db.publisher_tasks.save(task.__dict__, safe=True)
         return task
 
