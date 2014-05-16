@@ -14,6 +14,8 @@
          <th>Added on</th>
          <th>Added by</th>
          <th>Status</th>
+         <th>Git</th>
+         <th>Commit</th>
          <th>PSNR</th>
          <th>Public URLs</th>
          <th></th>
@@ -48,7 +50,9 @@
             ?>
             <span class="<?= $class ?>"><?= $status ?></span>
          </td>
-         <td><?= (isset($media->metadata->measures->total)?$media->metadata->measures->total:'(none)') ?></td>
+         <td><?= (isset($media->metadata->measures->git_url)?$media->metadata->measures->git_url:'(none)') ?></td>
+         <td><?= (isset($media->metadata->measures->git_commit)?$media->metadata->measures->git_commit:'(none)') ?></td>
+         <td><?= (isset($media->metadata->measures->psnr)?$media->metadata->measures->psnr:'(none)') ?></td>
          <td>
             <?php foreach ($media->public_uris as $public_uri): ?>
                <a href="<?= $public_uri ?>"><i class="icon-play"></i></a>
