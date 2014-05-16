@@ -74,8 +74,8 @@ def transform_task(media_in_json, media_out_json, profile_json, callback_json):
             u'eta_time': eta_time, u'media_in_size': src_size, u'media_out_size': dst_size,
             u'percent': int(100 * ratio)})
 
-    def transform_callback(status):
-        data_json = object2json({u'task_id': request.id, u'status': status}, include_properties=False)
+    def transform_callback(status, measures):
+        data_json = object2json({u'task_id': request.id, u'status': status, u'measures': measures}, include_properties=False)
         if callback is None:
             print(u'{0} [ERROR] Unable to callback orchestrator: {1}'.format(request.id, data_json))
         else:
@@ -132,7 +132,7 @@ def transform_task(media_in_json, media_out_json, profile_json, callback_json):
         media_in_duration = get_media_duration(media_in_path)
 
         # Keep potential PSNR status
-        psnr_stats = {}
+        measures = {}
 
         # NOT A REAL TRANSFORM : FILE COPY -----------------------------------------------------------------------------
         if profile.encoder_name == u'copy':
@@ -209,9 +209,9 @@ def transform_task(media_in_json, media_out_json, profile_json, callback_json):
             select.select([p_psnr.stdout], [], [])
             p_out = p_psnr.stdout.read()
             match = PSNR_REGEX.match(p_out)
-            psnr_stats['retcode'] = returncode
             if match:
-                psnr_stats = match.groupdict()
+                measures = match.groupdict()
+            measures['retcode'] = returncode
 
             # Output media file sanity check
 #            media_out_duration = get_media_duration(media_out_path)
@@ -292,17 +292,16 @@ def transform_task(media_in_json, media_out_json, profile_json, callback_json):
         media_out_size = get_size(media_out_root)
         media_out_duration = get_media_duration(media_out_path)
         print(u'{0} Transformation task successful, output media asset {1}'.format(request.id, media_out.filename))
-        transform_callback(TransformTask.SUCCESS)
+        transform_callback(TransformTask.SUCCESS, measures)
         return {u'hostname': request.hostname, u'start_date': start_date, u'elapsed_time': elapsed_time,
                 u'eta_time': 0, u'media_in_size': media_in_size, u'media_in_duration': media_in_duration,
-                u'media_out_size': media_out_size, u'media_out_duration': media_out_duration, u'percent': 100,
-                u'psnr': psnr_stats.get('total', -1)}
+                u'media_out_size': media_out_size, u'media_out_duration': media_out_duration, u'percent': 100 }
 
     except Exception as error:
 
         # Here something went wrong
         print(u'{0} Transformation task failed '.format(request.id))
-        transform_callback(u'ERROR\n{0}\n\nOUTPUT\n{1}'.format(unicode(error), encoder_out))
+        transform_callback(u'ERROR\n{0}\n\nOUTPUT\n{1}'.format(unicode(error), encoder_out), {})
         raise
 
     finally:
