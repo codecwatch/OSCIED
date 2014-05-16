@@ -86,10 +86,12 @@ class Misc extends MY_Controller
                && $media->metadata->add_date < $_GET['date_from']) continue;
            if (isset($_GET['date_to'])
                && $media->metadata->add_date > $_GET['date_to']) continue;
-           if (isset($_GET['source'])
-               && $media->parent->filename !== $_GET['source']) continue;
-           if (isset($_GET['git_url'])
-               && $media->measures->git_url !== $_GET['git_url']) continue;
+           if (isset($_GET['source']) && assert(is_array($_GET['source']))
+               && !in_array($media->parent->filename, $_GET['source']))
+                    continue;
+           if (isset($_GET['git_url']) && assert(is_array($_GET['git_url']))
+               && !in_array($media->measures->git_url, $_GET['git_url']))
+                    continue;
 
            // value (supported metrics)
            $fmetric_value = $fmetric == 'psnr'
