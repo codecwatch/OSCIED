@@ -209,12 +209,16 @@ def transform_task(media_in_json, media_out_json, profile_json, callback_json):
             select.select([p_psnr.stdout], [], [])
             p_out = p_psnr.stdout.read()
             match = PSNR_REGEX.match(p_out)
+            measures['psnr_retcode'] = returncode
             if match:
                 measures['psnr'] = match.groupdict()['total']
+
+            # measures of the data and its metadata
+            measures['bitrate'] = get_media_bitrate(media_out_path)
+
             # FIXME: fake git url, commit
             measures['git_url'] = 'https://github.com/videolan/x265'
             measures['git_commit'] = 'd2051f9544434612a105d2f5267db23018cb3454'
-            measures['retcode'] = returncode
 
             # Output media file sanity check
 #            media_out_duration = get_media_duration(media_out_path)
@@ -310,3 +314,13 @@ def transform_task(media_in_json, media_out_json, profile_json, callback_json):
     finally:
         if dashcast_conf:
             try_remove(dashcast_conf)
+
+# FIXME: to add to pytoolbox
+def get_media_bitrate(filename):
+    cmd = u'ffprobe "{0}"'.format(filename)
+    pipe = Popen(shlex.split(to_bytes(cmd)), stderr=PIPE, close_fds=True)
+    match = re.search(ur'bitrate: (?P<bitrate>\d+)', unicode(pipe.stderr.read()))
+    if not match:
+        return None
+    bitrate = match.group(u'bitrate')
+    return bitrate
