@@ -64,3 +64,9 @@
    -moz-border-radius: 0 0 4px 4px;
    border-radius: 0 0 4px 4px;
 }
+
+.overflow-ellipsis {
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden
+}

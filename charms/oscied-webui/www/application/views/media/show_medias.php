@@ -52,7 +52,7 @@
             <span class="<?= $class ?>"><?= $status ?></span>
          </td>
          <td><?= (isset($media->metadata->measures->git_url)?$media->metadata->measures->git_url:'(none)') ?></td>
-         <td><?= (isset($media->metadata->measures->git_commit)?$media->metadata->measures->git_commit:'(none)') ?></td>
+         <td style="max-width: 40px" class="overflow-ellipsis" title="<?= (isset($media->metadata->measures->git_commit)?$media->metadata->measures->git_commit:'(none)') ?>"><?= (isset($media->metadata->measures->git_commit)?$media->metadata->measures->git_commit:'(none)') ?></td>
          <td><?= (isset($media->metadata->measures->psnr)?$media->metadata->measures->psnr:'(none)') ?></td>
          <td><?= (isset($media->metadata->measures->ssim)?$media->metadata->measures->ssim:'(none)') ?></td>
          <td>
