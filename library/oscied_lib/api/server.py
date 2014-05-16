@@ -692,7 +692,7 @@ class OrchestraAPICore(object):
 
     # ------------------------------------------------------------------------------------------------------------------
 
-    def transform_callback(self, task_id, status):
+    def transform_callback(self, task_id, status, measures):
         task = self.get_transform_task({u'_id': task_id})
         if not task:
             raise IndexError(to_bytes(u'No transformation task with id {0}.'.format(task_id)))
@@ -701,6 +701,7 @@ class OrchestraAPICore(object):
             raise IndexError(to_bytes(u'Unable to find output media asset with id {0}.'.format(task.media_out_id)))
         if status == TransformTask.SUCCESS:
             media_out.status = Media.READY
+            media_out.metadata.update(measures)
             self.save_media(media_out)
             logging.info(u'{0} Media {1} is now {2}'.format(task_id, media_out.filename, media_out.status))
             #self.send_email_task(task, TransformTask.SUCCESS, media_out=media_out)

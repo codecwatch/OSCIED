@@ -64,9 +64,9 @@ def api_transform_task_hook(auth_user=None, api_core=None, request=None):
     The media asset will be deleted if task failed (even the worker already take care of that).
     """
     data = get_request_data(request, qs_only_first_value=True)
-    task_id, status = data[u'task_id'], data[u'status']
+    task_id, status, measures = data[u'task_id'], data[u'status'], data[u'measures']
     logging.debug(u'task {0}, status {1}'.format (task_id, status))
-    api_core.transform_callback(task_id, status)
+    api_core.transform_callback(task_id, status, measures)
     return ok_200(u'Your work is much appreciated, thanks !', include_properties=False)
 
 
