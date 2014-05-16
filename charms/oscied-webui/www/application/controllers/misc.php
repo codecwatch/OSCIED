@@ -36,7 +36,7 @@ class Misc extends MY_Controller
        return $response->value;
    }
 
-   public function json_encoders() {
+   public function json_gui() {
        $medias = $this->json_fetch();
 
        $encoders = array();
@@ -46,15 +46,6 @@ class Misc extends MY_Controller
            $encoders[$enco] = 1;
        }
 
-       $out_array = array_keys($encoders);
-       $this->output
-           ->set_content_type('application/json')
-           ->set_output(json_encode($out_array));
-   }
-
-   public function json_samplers() {
-       $medias = $this->json_fetch();
-
        $samplers = array();
        foreach ($medias as $media) {
            if ($media->parent != NULL) continue; // only root medias
@@ -62,7 +53,10 @@ class Misc extends MY_Controller
            $samplers[$fname] = 1;
        }
 
-       $out_array = array_keys($samplers);
+       $out_array = array(
+            "encoders" => array_keys($encoders),
+            "samplers" => array_keys($samplers),
+       );
        $this->output
            ->set_content_type('application/json')
            ->set_output(json_encode($out_array));
