@@ -54,6 +54,7 @@ FFMPEG_REGEX = re.compile(
     r'frame=\s*(?P<frame>\d+)\s+fps=\s*(?P<fps>\d+)\s+q=\s*(?P<q>\S+)\s+\S*size=\s*(?P<size>\S+)\s+'
     r'time=\s*(?P<time>\S+)\s+bitrate=\s*(?P<bitrate>\S+)')
 PSNR_REGEX = re.compile(r'Total:\s*(?P<total>\d+\.\d+)\s*\(\s*Y.: (?P<Y>\d+\.\d+)\s*Cb: (?P<Cb>\d+\.\d+)\s*Cr: (?P<Cr>\d+\.\d+)\s*\)')
+SSIM_REGEX = re.compile(r'Total:\s*(?P<total>\d+\.\d+)\s*\(\s*Y.: (?P<Y>\d+\.\d+)\s*Cb: (?P<Cb>\d+\.\d+)\s*Cr: (?P<Cr>\d+\.\d+)\s*\)')
 
 
 #@celeryd_after_setup.connect
@@ -201,17 +202,8 @@ def transform_task(media_in_json, media_out_json, profile_json, callback_json):
                 raise OSError(to_bytes(u'FFmpeg return code is {0}, encoding probably failed.'.format(returncode)))
 
             # compute stats about the video
-            cmd2 = "/usr/bin/dump_psnr" # FIXME: pass argument uncompressed
-            print(cmd2)
-            p_psnr = Popen(shlex.split(cmd2), stdout=PIPE, close_fds=True)
-            make_async(p_psnr.stdout)
-            returncode = p_psnr.wait()
-            select.select([p_psnr.stdout], [], [])
-            p_out = p_psnr.stdout.read()
-            match = PSNR_REGEX.match(p_out)
-            measures['psnr_retcode'] = returncode
-            if match:
-                measures['psnr'] = match.groupdict()['total']
+            measures['psnr'] = get_media_psnr(media_in_path, media_out_path)
+            measures['ssim'] = get_media_ssim(media_in_path, media_out_path)
 
             # measures of the data and its metadata
             measures['bitrate'] = get_media_bitrate(media_out_path)
@@ -324,3 +316,33 @@ def get_media_bitrate(filename):
         return None
     bitrate = match.group(u'bitrate')
     return bitrate
+
+def get_media_psnr(media_in_path, media_out_path):
+    cmd = "/usr/local/bin/dump_psnr" # FIXME: pass argument uncompressed
+    print(("psnr", cmd))
+    p_psnr = Popen(shlex.split(cmd), stdout=PIPE, close_fds=True)
+    make_async(p_psnr.stdout)
+    returncode = p_psnr.wait()
+    select.select([p_psnr.stdout], [], [])
+    p_out = p_psnr.stdout.read()
+    match = PSNR_REGEX.match(p_out)
+    #measures['psnr_retcode'] = returncode
+    if match:
+        return match.groupdict()['total']
+    else:
+        return None
+
+def get_media_ssim(media_in_path, media_out_path):
+    cmd = "/usr/local/bin/dump_ssim" # FIXME: pass argument uncompressed
+    print(("ssim",cmd))
+    p_ssim = Popen(shlex.split(cmd), stdout=PIPE, close_fds=True)
+    make_async(p_ssim.stdout)
+    returncode = p_ssim.wait()
+    select.select([p_ssim.stdout], [], [])
+    p_out = p_ssim.stdout.read()
+    match = SSIM_REGEX.match(p_out)
+    #measures['ssim_retcode'] = returncode
+    if match:
+        return match.groupdict()['total']
+    else:
+        return None
