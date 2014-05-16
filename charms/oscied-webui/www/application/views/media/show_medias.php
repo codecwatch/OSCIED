@@ -14,6 +14,7 @@
          <th>Added on</th>
          <th>Added by</th>
          <th>Status</th>
+         <th>PSNR</th>
          <th>Public URLs</th>
          <th></th>
       </tr>
@@ -47,6 +48,7 @@
             ?>
             <span class="<?= $class ?>"><?= $status ?></span>
          </td>
+         <td><?= (isset($media->metadata->measures->total)?$media->metadata->measures->total:'(none)') ?></td>
          <td>
             <?php foreach ($media->public_uris as $public_uri): ?>
                <a href="<?= $public_uri ?>"><i class="icon-play"></i></a>
