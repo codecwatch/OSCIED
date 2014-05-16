@@ -57,14 +57,19 @@ class Misc extends MY_Controller
            if (isset($_GET['git_url'])
                && $media->measures->git_url !== $_GET['git_url']) continue;
 
+           // value (supported metrics)
+           $fmetric_value = $fmetric == 'psnr'
+               ? @$media->metadata->measures->psnr
+               : @$media->metadata->measures->ssim;
+
            // output filtered medias list
            $out_array[] = array(
                 "git_url" => @$media->metadata->measures->git_url,
                 "file" => @$media->filename,
                 "date" => @$media->metadata->add_date,
-                "metric" => "PSNR",
+                "metric" => $fmetric,
+                "value" => $fmetric_value,
                 "bitrate" => @$media->metadata->measures->bitrate,
-                "value" => @$media->metadata->measures->psnr,
                 "git_commit" => @$media->metadata->measures->git_commit,
            );
        }
