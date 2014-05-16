@@ -210,7 +210,10 @@ def transform_task(media_in_json, media_out_json, profile_json, callback_json):
             p_out = p_psnr.stdout.read()
             match = PSNR_REGEX.match(p_out)
             if match:
-                measures = match.groupdict()
+                measures['psnr'] = match.groupdict()['total']
+            # FIXME: fake git url, commit
+            measures['git_url'] = 'https://github.com/videolan/x265'
+            measures['git_commit'] = 'd2051f9544434612a105d2f5267db23018cb3454'
             measures['retcode'] = returncode
 
             # Output media file sanity check
