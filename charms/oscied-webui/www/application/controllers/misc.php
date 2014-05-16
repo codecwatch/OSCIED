@@ -18,7 +18,7 @@ class Misc extends MY_Controller
       $this->render($header_data);
    }
 
-   public function json() {
+   private function json_fetch() {
        $this->load->helper('number');
        $this->load->spark('restclient/2.1.0');
        $this->load->library('rest');
@@ -33,7 +33,11 @@ class Misc extends MY_Controller
            print_r($response->value);
            exit;
        }
-       $medias = $response->value;
+       return $response->value;
+   }
+
+   public function json() {
+       $medias = $this->json_fetch();
 
        // conditions (supported metrics)
        $fmetric = strtolower(@$_GET['metric']);
