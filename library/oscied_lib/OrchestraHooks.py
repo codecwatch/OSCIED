@@ -210,6 +210,9 @@ class OrchestraHooks(CharmHooks_Storage):
         self.info(u'Ensure that the Apache sites directory is owned by the right user')
         chown(local_cfg.sites_directory, DAEMON_USER, DAEMON_GROUP, recursive=True)
 
+        self.info(u'Configure Cronjob')
+        self.template2config(local_cfg.cronjob_template_file, '/etc/cron.d/cron_enco', {})
+
         self.storage_remount()
 
     def hook_uninstall(self):

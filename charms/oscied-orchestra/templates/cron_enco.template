@@ -1,0 +1,2 @@
+# m h  dom mon dow   user command
+0 0 */6 * * root python /var/www/api/cron_enco.py

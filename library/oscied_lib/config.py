@@ -50,6 +50,7 @@ class OrchestraLocalConfig(CharmLocalConfig_Storage):
                  mongo_config_file=u'/etc/mongodb.conf',
                  sites_available_path=u'/etc/apache2/sites-available',
                  sites_directory=u'/var/www',
+                 cronjob_template_file=u'templates/cron_enco.template',
                  **kwargs):
         super(OrchestraLocalConfig, self).__init__(**kwargs)
         self.api_url = api_url
@@ -77,6 +78,7 @@ class OrchestraLocalConfig(CharmLocalConfig_Storage):
         self.mongo_config_file = mongo_config_file
         self.sites_available_path = sites_available_path
         self.sites_directory = sites_directory
+        self.cronjob_template_file = cronjob_template_file
 
     @property
     def is_mock(self):
