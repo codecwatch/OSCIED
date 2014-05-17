@@ -16,7 +16,7 @@ CONFIG_FILENAME = join(abspath(dirname(__file__)), LOCAL_CONFIG_FILENAME)
 
 if __name__ == '__main__':
     local_config = OrchestraLocalConfig.read(CONFIG_FILENAME, inspect_constructor=False)
-    api_core = OrchestraAPICore(local_config)
+    orchestra = OrchestraAPICore(local_config)
 
     user_id = "12f67500-aa53-4bc8-89e8-2e3da74c14e7" # David Fischer
     media_in_id = "cdd90479-f8aa-46dd-ba89-de2b1b5488fa" # bus_cif.webm
