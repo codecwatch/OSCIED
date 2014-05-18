@@ -29,18 +29,21 @@ if __name__ == '__main__':
 
         profile_id = profile._id
         title = 'cronjob_%s_%s' % (int(time()), profile.title)
-        out_filename = title + ".webm"
         input_bitrates = [1000]
 
         if profile.title == "libvpx-vp8 git":
+            extension = ".webm"
             git_url = "https://chromium.googlesource.com/webm/libvpx"
             build_cmds = "./configure --disable-vp9 --disable-unit-tests && make"
         elif profile.title == "x264 git":
+            extension = ".mp4"
             git_url = "git://git.videolan.org/x264.git"
             build_cmds = "./configure && make"
         else:
             print(u'Unknown profile: "{0}"'.format(profile.title))
             continue
+
+        out_filename = title + extension
 
         tmpdir = tempfile.mkdtemp()
         # Use the same git commit for every file and every bitrate we encode for
