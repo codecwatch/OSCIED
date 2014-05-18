@@ -33,7 +33,7 @@ from pytoolbox.serialization import dict2object
 from pytoolbox.mongo import Model, TaskModel
 from pytoolbox.validation import valid_email, valid_filename, valid_int, valid_secret, valid_uuid
 
-ENCODERS_NAMES = (u'copy', u'ffmpeg', u'dashcast')
+ENCODERS_NAMES = (u'copy', u'ffmpeg', u'from_git', u'dashcast')
 
 
 # ----------------------------------------------------------------------------------------------------------------------

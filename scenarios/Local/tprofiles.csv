@@ -5,4 +5,6 @@ Force 720p;Force aspect to 16/9 and resolution to 720p;ffmpeg;-aspect 16:9 -s 12
 HQ PAL-SD;High-quality SD for archive/storage (PAL at 1Mbps in high profile);ffmpeg;-c:v libx264 -profile:v high -preset slower -b:v 1000k -vf scale=-1:576 -acodec aac -ar 196k -f mp4
 Negate;Negate video track -> MP4;ffmpeg;-strict experimental -vf 'negate'
 Speed-up 2x;Speed-up video track by a factor of 2, remove audio -> MP4;ffmpeg;-strict experimental -vf 'setpts=0.5*PTS'
-Tablet 480p/25;480p for tablets (480p/25 at 1Mbps in main profile with low-latency);ffmpeg;-r 25 -c:v libx264 -profile:v main -preset slow -tune zerolatency -pix_fmt yuv420p -strict experimental -b:v 1000k -maxrate 1000k -bufsize 2000k -vf scale='trunc(oh*a/2)*2:min(480\,iw)' -acodec aac -ac 2 -ar 44100 -ab 96k -f mp4
+Tablet 480p/25;480p for tablets (480p/25 at 1Mbps in main profile with low-latency);ffmpeg;-r 25 -c:v libx264 -profile:v main -preset slow -tune zerolatency -pix_fmt yuv420p -strict experimental -b:v 1000k -maxrate 1000k -bufsize 2000k -vf scale='trunc(oh*a/2)*2:min(480\,iw)' -acodec aac -ac 2 -ar 44100 -ab 96k -f mp4g
+x264 git;x264 from git;from_git;./x264 --bitrate BITRATE --demuxer y4m - -o
+libvpx-vp8 git;libvpx-vp8 from git;from_git;./vpxenc --codec=vp8 --target-bitrate=BITRATE - -o

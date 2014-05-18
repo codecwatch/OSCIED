@@ -36,7 +36,7 @@ from pytoolbox.ffmpeg import get_media_duration, get_media_tracks
 from pytoolbox.filesystem import get_size, recursive_copy, try_makedirs, try_remove
 from pytoolbox.serialization import object2json
 from pytoolbox.subprocess import make_async, read_async
-from subprocess import Popen, PIPE
+from subprocess import check_call, call, Popen, PIPE
 
 from .config import TransformLocalConfig
 from .constants import LOCAL_CONFIG_FILENAME
@@ -216,6 +216,41 @@ def transform_task(media_in_json, media_out_json, profile_json, callback_json):
 #            media_out_duration = get_media_duration(media_out_path)
 #            if total_seconds(media_out_duration) / total_seconds(media_in_duration) > 1.5 or < 0.8:
 #                salut
+
+        elif profile.encoder_name == u'from_git':
+
+            start_date, start_time = datetime_now(), time.time()
+            prev_ratio = prev_time = 0
+
+            # Get input media size to be able to estimate ETA
+            media_in_size = get_size(media_in_root)
+            metadata = media_out.metadata
+            print(metadata)
+
+            prepare_cmd = u'git clone "{0}" encoder && cd encoder && git checkout "{1}" && "{2}"'.format(metadata.git_url, metadata.git_commit, metadata.build_cmds)
+            print(prepare_cmd)
+            check_call(prepare_cmd, shell=True)
+
+            # Templated parameter
+            encoder_string = profile.encoder_string.replace(u"BITRATE", metadata.input_bitrate)
+
+            cmd = u'cd encoder && ffmpeg -y -i "{0}" -f yuv4mpegpipe - | "{1}" "{2}"'.format(media_in_path, encoder_string, media_out_path)
+            print(cmd)
+            returncode = call(cmd, shell=True)
+
+            if returncode != 0:
+                raise OSError(to_bytes(u'Encoding return code is {0}, encoding probably failed.'.format(returncode)))
+
+            # compute stats about the video
+            measures['psnr'] = get_media_psnr(media_in_path, media_out_path)
+            measures['ssim'] = get_media_ssim(media_in_path, media_out_path)
+
+            # measures of the data and its metadata
+            measures['bitrate'] = get_media_bitrate(media_out_path)
+
+            # FIXME: don't put this in measures
+            measures['git_url'] = metadata.git_url
+            measures['git_commit'] = metadata.git_commit
 
         # A REAL TRANSFORM : TRANSCODE WITH DASHCAST -------------------------------------------------------------------
         elif profile.encoder_name == u'dashcast':
