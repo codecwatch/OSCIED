@@ -53,8 +53,8 @@ DASHCAST_SUCCESS_REGEX = re.compile(r'MPD file generated')
 FFMPEG_REGEX = re.compile(
     r'frame=\s*(?P<frame>\d+)\s+fps=\s*(?P<fps>\d+)\s+q=\s*(?P<q>\S+)\s+\S*size=\s*(?P<size>\S+)\s+'
     r'time=\s*(?P<time>\S+)\s+bitrate=\s*(?P<bitrate>\S+)')
-PSNR_REGEX = re.compile(r'Total:\s*(?P<total>\d+\.\d+)\s*\(\s*Y.: (?P<Y>\d+\.\d+)\s*Cb: (?P<Cb>\d+\.\d+)\s*Cr: (?P<Cr>\d+\.\d+)\s*\)')
-SSIM_REGEX = re.compile(r'Total:\s*(?P<total>\d+\.\d+)\s*\(\s*Y.: (?P<Y>\d+\.\d+)\s*Cb: (?P<Cb>\d+\.\d+)\s*Cr: (?P<Cr>\d+\.\d+)\s*\)')
+PSNR_REGEX = re.compile(r'Total:\s*(?P<total>-?\d+\.\d+)\s*\(\s*Y.: (?P<Y>-?\d+\.\d+)\s*Cb: (?P<Cb>-?\d+\.\d+)\s*Cr: (?P<Cr>-?\d+\.\d+)\s*\)')
+SSIM_REGEX = PSNR_REGEX
 
 
 #@celeryd_after_setup.connect
@@ -375,9 +375,12 @@ def get_media_psnr(media_in_path, media_out_path):
         return None
 
 def get_media_ssim(media_in_path, media_out_path):
-    cmd = "/usr/local/bin/dump_ssim" # FIXME: pass argument uncompressed
+    cmd = ('/usr/local/bin/dump_ssim -s'
+            +' <(ffmpeg -v quiet -y -i "{0}" -f yuv4mpegpipe - 2>/dev/null)'
+            +' <(ffmpeg -v quiet -y -i "{1}" -f yuv4mpegpipe - 2>/dev/null)'
+        ).format(media_in_path, media_out_path)
     print(("ssim",cmd))
-    p_ssim = Popen(shlex.split(cmd), stdout=PIPE, close_fds=True)
+    p_ssim = bash_cmd(cmd)
     make_async(p_ssim.stdout)
     returncode = p_ssim.wait()
     select.select([p_ssim.stdout], [], [])
