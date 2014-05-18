@@ -28,7 +28,6 @@ if __name__ == '__main__':
     for profile in profiles:
 
         profile_id = profile._id
-        title = 'cronjob_%s_%s' % (int(time()), profile.title)
         input_bitrates = [100,200,400,800,1600]
 
         if profile.title == "libvpx-vp8 git":
@@ -43,7 +42,6 @@ if __name__ == '__main__':
             print(u'Unknown profile: "{0}"'.format(profile.title))
             continue
 
-        out_filename = title + extension
 
         tmpdir = tempfile.mkdtemp()
         # Use the same git commit for every file and every bitrate we encode for
@@ -51,6 +49,8 @@ if __name__ == '__main__':
                                   .format(git_url, tmpdir), shell=True).rstrip()
 
         for input_bitrate in input_bitrates:
+            title = 'cronjob_%s_%s_%d' % (int(time()), profile.title, input_bitrate)
+            out_filename = title + extension
             metadata = { 'title': title, 'git_url': git_url, 'git_commit': git_commit,
                          'build_cmds': build_cmds, 'input_bitrate': input_bitrate }
             print(metadata)
