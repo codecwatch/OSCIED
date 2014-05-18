@@ -227,12 +227,12 @@ def transform_task(media_in_json, media_out_json, profile_json, callback_json):
             metadata = media_out.metadata
             print(metadata)
 
-            prepare_cmd = u'git clone "{0}" encoder && cd encoder && git checkout "{1}" && "{2}"'.format(metadata.git_url, metadata.git_commit, metadata.build_cmds)
+            prepare_cmd = u'git clone "{0}" encoder && cd encoder && git checkout "{1}" && "{2}"'.format(metadata['git_url'], metadata['git_commit'], metadata['build_cmds'])
             print(prepare_cmd)
             check_call(prepare_cmd, shell=True)
 
             # Templated parameter
-            encoder_string = profile.encoder_string.replace(u"BITRATE", metadata.input_bitrate)
+            encoder_string = profile.encoder_string.replace(u"BITRATE", metadata['input_bitrate'])
 
             cmd = u'cd encoder && ffmpeg -y -i "{0}" -f yuv4mpegpipe - | "{1}" "{2}"'.format(media_in_path, encoder_string, media_out_path)
             print(cmd)
@@ -249,8 +249,8 @@ def transform_task(media_in_json, media_out_json, profile_json, callback_json):
             measures['bitrate'] = get_media_bitrate(media_out_path)
 
             # FIXME: don't put this in measures
-            measures['git_url'] = metadata.git_url
-            measures['git_commit'] = metadata.git_commit
+            measures['git_url'] = metadata['git_url']
+            measures['git_commit'] = metadata['git_commit']
 
         # A REAL TRANSFORM : TRANSCODE WITH DASHCAST -------------------------------------------------------------------
         elif profile.encoder_name == u'dashcast':
