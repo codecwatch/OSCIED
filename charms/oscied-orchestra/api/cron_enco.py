@@ -29,7 +29,7 @@ if __name__ == '__main__':
 
         profile_id = profile._id
         title = 'cronjob_%s_%s' % (int(time()), profile.title)
-        input_bitrates = [1000]
+        input_bitrates = [100,200,400,800,1600]
 
         if profile.title == "libvpx-vp8 git":
             extension = ".webm"
