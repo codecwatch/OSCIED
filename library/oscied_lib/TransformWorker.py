@@ -228,7 +228,7 @@ def transform_task(media_in_json, media_out_json, profile_json, callback_json):
             print(metadata, file=sys.stderr)
             dirpath = tempfile.mkdtemp()
 
-            prepare_cmd = u'git clone "{0}" "{1}" && cd "{1}" && git checkout "{2}" && {3}'.format(metadata['git_url'], dirpath, metadata['git_commit'], metadata['build_cmds'])
+            prepare_cmd = u'git clone --depth=1 "{0}" "{1}" && cd "{1}" && git checkout "{2}" && {3}'.format(metadata['git_url'], dirpath, metadata['git_commit'], metadata['build_cmds'])
             print(prepare_cmd, file=sys.stderr)
             check_call(prepare_cmd, shell=True)
 
