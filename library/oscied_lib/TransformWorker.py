@@ -36,7 +36,7 @@ from pytoolbox.ffmpeg import get_media_duration, get_media_tracks
 from pytoolbox.filesystem import get_size, recursive_copy, try_makedirs, try_remove
 from pytoolbox.serialization import object2json
 from pytoolbox.subprocess import make_async, read_async
-from subprocess import check_call, call, Popen, PIPE
+from subprocess import check_call, check_output, call, Popen, PIPE
 
 from .config import TransformLocalConfig
 from .constants import LOCAL_CONFIG_FILENAME
@@ -355,8 +355,7 @@ def get_media_bitrate(filename):
     return bitrate
 
 def bash_cmd(cmd):
-    return Popen(cmd, shell=True, executable='/bin/bash',
-        stdout=PIPE, close_fds=True)
+    return check_output(cmd, shell=True, executable='/bin/bash')
 
 def get_media_psnr(media_in_path, media_out_path):
     cmd = ('/usr/local/bin/dump_psnr -s'
@@ -365,12 +364,7 @@ def get_media_psnr(media_in_path, media_out_path):
         ).format(media_in_path, media_out_path)
     print(("psnr", cmd))
     p_psnr = bash_cmd(cmd)
-    make_async(p_psnr.stdout)
-    returncode = p_psnr.wait()
-    select.select([p_psnr.stdout], [], [])
-    p_out = p_psnr.stdout.read()
-    match = PSNR_REGEX.match(p_out)
-    #measures['psnr_retcode'] = returncode
+    match = PSNR_REGEX.match(p_psnr)
     if match:
         return match.groupdict()['total']
     else:
@@ -383,11 +377,7 @@ def get_media_ssim(media_in_path, media_out_path):
         ).format(media_in_path, media_out_path)
     print(("ssim",cmd))
     p_ssim = bash_cmd(cmd)
-    make_async(p_ssim.stdout)
-    returncode = p_ssim.wait()
-    select.select([p_ssim.stdout], [], [])
-    p_out = p_ssim.stdout.read()
-    match = SSIM_REGEX.match(p_out)
+    match = SSIM_REGEX.match(p_ssim)
     #measures['ssim_retcode'] = returncode
     if match:
         return match.groupdict()['total']
