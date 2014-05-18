@@ -40,15 +40,13 @@ class Misc extends MY_Controller
        $medias = $this->json_fetch();
 
        $encoders = array();
-       foreach ($medias as $media) {
-           if (!isset($media->metadata->measures)) continue;
-           $enco = $media->metadata->measures->git_url;
-           $encoders[$enco] = 1;
-       }
-
        $samplers = array();
        foreach ($medias as $media) {
-           if ($media->parent != NULL) continue; // only root medias
+           if (@$media->status != "READY") continue;
+           if (!isset($media->metadata->measures)) continue;
+           if (!isset($media->metadata->measures->git_url)) continue;
+           $enco = $media->metadata->measures->git_url;
+           $encoders[$enco] = 1;
            $fname = $media->filename;
            $samplers[$fname] = 1;
        }
