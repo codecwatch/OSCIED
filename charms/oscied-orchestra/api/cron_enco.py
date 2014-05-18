@@ -1,8 +1,9 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
-import logging, sys
+import logging, sys, tempfile
 from argparse import ArgumentParser, ArgumentDefaultsHelpFormatter
 from os.path import abspath, dirname, join
+from subprocess import check_output
 from pytoolbox.encoding import configure_unicode
 from pytoolbox.logging import setup_logging
 from oscied_lib.api import ABOUT, get_test_api_core, OrchestraAPICore
@@ -29,8 +30,27 @@ if __name__ == '__main__':
         profile_id = profile._id
         title = 'cronjob_%s_%s' % (int(time()), profile.title)
         out_filename = title + ".webm"
-        metadata = { 'title': title } # Add meta-info for git build
+        input_bitrates = [1000]
 
-        orchestra.launch_transform_task(user_id, media_in_id, profile_id,
-                out_filename, metadata, send_email, queue,
-                u'/transform/callback')
+        if profile.title == "libvpx-vp8 git":
+            git_url = "https://chromium.googlesource.com/webm/libvpx"
+            build_cmds = "./configure --disable-vp9 --disable-unit-tests && make"
+        elif profile.title == "x264 git":
+            git_url = "git://git.videolan.org/x264.git"
+            build_cmds = "./configure && make"
+        else:
+            print(u'Unknown profile: "{0}"'.format(profile.title))
+            continue
+
+        tmpdir = tempfile.mkdtemp()
+        # Use the same git commit for every file and every bitrate we encode for
+        git_commit = check_output('git clone --quiet --depth=1 "{0}" "{1}" && cd "{1}" && git rev-parse HEAD && cd .. && rm -rf "{1}"'
+                                  .format(git_url, tmpdir), shell=True).rstrip()
+
+        for input_bitrate in input_bitrates:
+            metadata = { 'title': title, 'git_url': git_url, 'git_commit': git_commit,
+                         'build_cmds': build_cmds, 'input_bitrate': input_bitrate }
+            print(metadata)
+            orchestra.launch_transform_task(user_id, media_in_id, profile_id,
+                    out_filename, metadata, send_email, queue,
+                    u'/transform/callback')
