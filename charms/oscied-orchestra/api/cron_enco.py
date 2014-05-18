@@ -20,12 +20,17 @@ if __name__ == '__main__':
 
     user_id = "12f67500-aa53-4bc8-89e8-2e3da74c14e7" # David Fischer
     media_in_id = "cdd90479-f8aa-46dd-ba89-de2b1b5488fa" # bus_cif.webm
-    profile_id = "3e051f17-3d56-4958-bc50-963ed502174e" # Force 720p
-    title = 'cronjob_%s' % int(time())
-    out_filename = title + ".webm"
-    metadata = { 'title': title }
     send_email = 'false'
     queue = 'transform'
 
-    orchestra.launch_transform_task(user_id, media_in_id, profile_id,
-            out_filename, metadata, send_email, queue, u'/transform/callback')
+    profiles = orchestra.get_transform_profiles({'encoder_name': 'from_git'})
+    for profile in profiles:
+
+        profile_id = profile._id
+        title = 'cronjob_%s_%s' % (int(time()), profile.title)
+        out_filename = title + ".webm"
+        metadata = { 'title': title } # Add meta-info for git build
+
+        orchestra.launch_transform_task(user_id, media_in_id, profile_id,
+                out_filename, metadata, send_email, queue,
+                u'/transform/callback')
