@@ -324,6 +324,7 @@ def transform_task(media_in_json, media_out_json, profile_json, callback_json):
             # FIXME check duration too !
 
         # Here all seem okay -------------------------------------------------------------------------------------------
+        elapsed_time = time.time() - start_time
         media_out_size = get_size(media_out_root)
         media_out_duration = get_media_duration(media_out_path)
         print(u'{0} Transformation task successful, output media asset {1}'.format(request.id, media_out.filename))
