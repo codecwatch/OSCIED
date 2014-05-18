@@ -352,10 +352,17 @@ def get_media_bitrate(filename):
     bitrate = match.group(u'bitrate')
     return bitrate
 
+def bash_cmd(cmd):
+    return Popen(cmd, shell=True, executable='/bin/bash',
+        stdout=PIPE, close_fds=True)
+
 def get_media_psnr(media_in_path, media_out_path):
-    cmd = "/usr/local/bin/dump_psnr" # FIXME: pass argument uncompressed
+    cmd = ('/usr/local/bin/dump_psnr -s'
+            +' <(ffmpeg -v quiet -y -i "{0}" -f yuv4mpegpipe - 2>/dev/null)'
+            +' <(ffmpeg -v quiet -y -i "{1}" -f yuv4mpegpipe - 2>/dev/null)'
+        ).format(media_in_path, media_out_path)
     print(("psnr", cmd))
-    p_psnr = Popen(shlex.split(cmd), stdout=PIPE, close_fds=True)
+    p_psnr = bash_cmd(cmd)
     make_async(p_psnr.stdout)
     returncode = p_psnr.wait()
     select.select([p_psnr.stdout], [], [])
