@@ -1,5 +1,7 @@
 <h1 class="page-header">Available media assets</h1>
 
+<iframe style="width:100%; height: 800px; overflow: hidden;" scrolling="no" src="../graphs/index.html" seamless></iframe>
+
 <div id="medias">
    <?= $this->load->view('media/show_medias') ?>
 </div>
