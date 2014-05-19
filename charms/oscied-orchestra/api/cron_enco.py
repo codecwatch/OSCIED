@@ -55,7 +55,7 @@ if __name__ == '__main__':
                                       .format(git_url, tmpdir), shell=True).rstrip()
         git_commit = cloned[git_url]
 
-        title = 'cronjob_%s_%s_%d' % (int(time()), profile.title, ibitrate)
+        title = 'cronjob_%s_%s_%s_%d' % (int(time()), media.filename, profile.title, ibitrate)
         out_filename = title + extension
         metadata = { 'title': title, 'git_url': git_url, 'git_commit': git_commit,
                      'build_cmds': build_cmds, 'input_bitrate': ibitrate }
