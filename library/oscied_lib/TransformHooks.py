@@ -44,10 +44,11 @@ class TransformHooks(CharmHooks_Storage, CharmHooks_Subordinate):
                        u'libtheora-dev', u'libvorbis-dev', u'libvpx-dev', u'libxvidcore-dev', u'zlib1g-dev')
     FF_CPL_PACKAGES = (u'autoconf', u'automake', u'build-essential', u'checkinstall', u'libtool', u'pkg-config',
                        u'texi2html', u'yasm', u'zlib1g-dev')
-    FF_RMV_PACKAGES = (u'libgpac2', u'libgpac-dev')
-    FF_ALL_PACKAGES = tuple(set(FF_BIN_PACKAGES + FF_DEV_PACKAGES + FF_CPL_PACKAGES))
+    FF_RMV_PACKAGES = (u'libgpac2') # FIXME: had libgpac-dev, why?
+    FF_ALL_PACKAGES = tuple(set(FF_BIN_PACKAGES + FF_DEV_PACKAGES + FF_CPL_PACKAGES + FF_CW_PACKAGES))
     FF_LIBS = (u'gnutls', u'libass', u'libbluray', u'libmp3lame', u'libvorbis', u'libvpx', u'libx264', u'libxvid')
     FF_CONFIGURE_OPTIONS = u'--enable-gpl ' + u' '.join(u'--enable-{0}'.format(library) for library in FF_LIBS)
+    CW_PACKAGES  = ('dh-autoreconf', 'pkg-config', 'libpng-dev', 'libogg-dev', 'libtool', 'libgpac-dev', 'yasm', 'libjpeg-dev')
 
     PACKAGES = tuple(set(CharmHooks_Storage.PACKAGES + CharmHooks_Subordinate.PACKAGES + (u'ntp',)))
 
@@ -99,6 +100,15 @@ class TransformHooks(CharmHooks_Storage, CharmHooks_Subordinate):
         else:
             self.info(u'Install GPAC/DashCast')
             self.cmd(u'apt-get -y install gpac')
+
+        # CodecWatch dependencies
+        self.cmd(u'apt-get -y install {0}'.format(u' '.join(TransformHooks.CW_PACKAGES)))
+        self.cmd(('git clone --quiet --depth=1 "{0}" "{1}" ; cd "{1}"'
+                    + ' && ./autogen.sh'
+                    + ' && ./configure --disable-player --disable-doc  --disable-unit-tests'
+                    + ' && make -j6 tools'
+                    + ' && cp tools/dump_psnr tools/dump_ssim /usr/local/bin/ ; cd'
+                ).format('git://git.xiph.org/daala.git', 'daala'))
 
     def hook_config_changed(self):
         self.storage_remount()
