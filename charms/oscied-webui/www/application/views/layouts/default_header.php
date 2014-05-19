@@ -14,7 +14,7 @@
                <?php else: ?>
                <li><a href="<?= site_url() ?>">Home</a></li>
                <?php endif; ?>
-
+<!--
                <li class="dropdown">
                   <a href="#" class="dropdown-toggle" data-toggle="dropdown">Links <b class="caret"></b></a>
                   <ul class="dropdown-menu">
@@ -91,7 +91,7 @@
                <li><a href="<?= site_url('contact') ?>">Contact Us</a></li>
                <?php endif; ?>
             </ul>
-
+-->
             <?php if ($this->session->userdata('user_logged')): ?>
             <div class="btn-group pull-right">
                <a class="btn dropdown-toggle" data-toggle="dropdown" href="#">
@@ -116,6 +116,8 @@
                <li<?php if ($page == 'profile'): ?> class="active"<?php endif; ?>><a href="<?= site_url('profile/') ?>"><i class="icon-lock icon-white"></i> Profiles</a></li>
                <li<?php if ($page == 'transform'): ?> class="active"<?php endif; ?>><a href="<?= site_url('transform/') ?>"><i class="icon-lock icon-white"></i> Transform</a></li>
                <li<?php if ($page == 'publisher'): ?> class="active"<?php endif; ?>><a href="<?= site_url('publisher/') ?>"><i class="icon-lock icon-white"></i> Publisher</a></li>
+               <li<?php if ($page == 'metrics'): ?> class="active"<?php endif; ?>><a href="<?= site_url('metrics/') ?>"><i class="icon-lock icon-white"></i> Metrics</a></li>
+               <li<?php if ($page == 'splitview'): ?> class="active"<?php endif; ?>><a href="<?= site_url('splitview/') ?>"><i class="icon-lock icon-white"></i> SplitView</a></li>
                <?php endif; ?>
             </ul>
          </div>
