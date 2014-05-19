@@ -225,18 +225,15 @@ def transform_task(media_in_json, media_out_json, profile_json, callback_json):
             # Get input media size to be able to estimate ETA
             media_in_size = get_size(media_in_root)
             metadata = media_out.metadata
-            print(metadata, file=sys.stderr)
             dirpath = tempfile.mkdtemp()
 
             prepare_cmd = u'git clone --depth=1 "{0}" "{1}" && cd "{1}" && git checkout "{2}" && {3}'.format(metadata['git_url'], dirpath, metadata['git_commit'], metadata['build_cmds'])
-            print(prepare_cmd, file=sys.stderr)
             check_call(prepare_cmd, shell=True)
 
             # Templated parameter
             encoder_string = profile.encoder_string.replace(u"BITRATE", str(metadata['input_bitrate']))
 
             cmd = u'cd "{0}" && ffmpeg -y -i "{1}" -f yuv4mpegpipe - | {2} "{3}"'.format(dirpath, media_in_path, encoder_string, media_out_path)
-            print(cmd, file=sys.stderr)
             returncode = call(cmd, shell=True)
 
             if returncode != 0:
